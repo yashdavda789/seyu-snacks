@@ -1,0 +1,910 @@
+/* ===================================================================
+   Seyu Snacks & Namkeen
+
+   Every colour is a token on :root, redefined once for dark mode.
+   Change the brand here and the whole site follows.
+   =================================================================== */
+
+:root {
+  --bg: #fff4e6;
+  --band: #ffe9d0;
+  --surface: #ffffff;
+  --line: #f0d2a8;
+  --edge: #45062f;
+  --ink: #230b16;
+  --ink-soft: #7c5348;
+  --hot: #ff2e63;
+  --sun: #ff9100;
+  --deep: #45062f;
+  --deep-ink: #ffe7d2;
+  --wa: #128c4a;
+  --wa-ink: #ffffff;
+  --card-sh: 0 2px 0 var(--edge), 0 12px 26px -16px rgba(69, 6, 47, 0.5);
+
+  --display: 'Baloo 2', 'Trebuchet MS', system-ui, sans-serif;
+  --body: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: light;
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #150710;
+    --band: #240d1b;
+    --surface: #2b1121;
+    --line: #4a2139;
+    --edge: #0c0308;
+    --ink: #ffede0;
+    --ink-soft: #c9a096;
+    --hot: #ff5b83;
+    --sun: #ffb13d;
+    --deep: #1c0512;
+    --deep-ink: #ffe7d2;
+    --wa: #1fa85c;
+    --wa-ink: #06230f;
+    --card-sh: 0 2px 0 #0c0308, 0 14px 30px -16px rgba(0, 0, 0, 0.9);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --bg: #150710;
+  --band: #240d1b;
+  --surface: #2b1121;
+  --line: #4a2139;
+  --edge: #0c0308;
+  --ink: #ffede0;
+  --ink-soft: #c9a096;
+  --hot: #ff5b83;
+  --sun: #ffb13d;
+  --deep: #1c0512;
+  --deep-ink: #ffe7d2;
+  --wa: #1fa85c;
+  --wa-ink: #06230f;
+  --card-sh: 0 2px 0 #0c0308, 0 14px 30px -16px rgba(0, 0, 0, 0.9);
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 20;
+  height: env(safe-area-inset-top, 0px);
+  background: var(--deep);
+}
+
+img {
+  max-width: 100%;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* ---------------------------------------------------------- ticker */
+
+.ticker {
+  background: var(--deep);
+  color: var(--deep-ink);
+  overflow: hidden;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--edge);
+}
+
+.ticker-in {
+  display: inline-block;
+  padding-block: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  animation: slide 26s linear infinite;
+}
+
+.ticker-in span {
+  padding-right: 0.6em;
+}
+
+@keyframes slide {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------------------------------------------------------- header */
+
+header.shop {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 19;
+  background: var(--bg);
+  border-bottom: 2px solid var(--edge);
+}
+
+header.shop .wrap {
+  padding-block: 11px;
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  margin-right: auto;
+  min-width: 0;
+}
+
+.logo {
+  width: 46px;
+  height: 46px;
+  flex: none;
+  display: block;
+}
+
+.brand-name {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(18px, 4.2vw, 26px);
+  line-height: 1.04;
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.brand-name em {
+  font-style: normal;
+  color: var(--hot);
+}
+
+.brand-sub {
+  margin: 1px 0 0;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.call {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  background: var(--wa);
+  color: var(--wa-ink);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 10px 16px;
+  border: 2px solid var(--edge);
+  border-radius: 999px;
+  box-shadow: 0 2px 0 var(--edge);
+}
+
+.call svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.call span {
+  display: none;
+}
+
+@media (min-width: 620px) {
+  .call span { display: inline; }
+}
+
+/* ------------------------------------------------------------ hero */
+
+.hero {
+  background:
+    radial-gradient(1100px 420px at 88% -12%, rgba(255, 145, 0, 0.42), transparent 62%),
+    radial-gradient(760px 380px at 4% 0%, rgba(255, 46, 99, 0.3), transparent 60%),
+    var(--bg);
+  border-bottom: 2px solid var(--edge);
+}
+
+.hero .wrap {
+  padding-block: 30px 26px;
+}
+
+.crumbs {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin: 0 0 14px;
+}
+
+.crumbs a { text-decoration: none; }
+.crumbs a:hover { text-decoration: underline; }
+.crumbs span { color: var(--ink); }
+
+.kicker {
+  display: inline-block;
+  transform: rotate(-2.2deg);
+  background: var(--hot);
+  color: #fff4e6;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 6px 13px;
+  border: 2px solid var(--edge);
+  border-radius: 999px;
+  box-shadow: 0 2px 0 var(--edge);
+  margin: 0 0 12px;
+}
+
+h1 {
+  font-family: var(--display);
+  font-weight: 800;
+  letter-spacing: -0.035em;
+  font-size: clamp(44px, 12.5vw, 104px);
+  line-height: 0.88;
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 .pop {
+  background: linear-gradient(104deg, var(--hot), var(--sun));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-sub {
+  margin: 14px 0 0;
+  max-width: 54ch;
+  font-size: 15.5px;
+  color: var(--ink-soft);
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tags li {
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--edge);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 2px 0 var(--edge);
+}
+
+.tags li:nth-child(2n) {
+  background: var(--band);
+}
+
+/* -------------------------------------------------- delivery band */
+
+.ship {
+  background: var(--deep);
+  color: var(--deep-ink);
+  border-bottom: 2px solid var(--edge);
+}
+
+.ship .wrap { padding-block: 22px 24px; }
+
+.ship-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 14px;
+}
+
+.ship-head h2 {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: clamp(22px, 5vw, 32px);
+  margin: 0;
+  letter-spacing: -0.02em;
+}
+
+.ship-head p {
+  margin: 0;
+  font-size: 14px;
+  opacity: 0.88;
+}
+
+.ship-head .fast {
+  background: var(--sun);
+  color: #2a1000;
+  font-weight: 800;
+  font-size: 12.5px;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 2px solid var(--edge);
+  white-space: nowrap;
+}
+
+.ship-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  margin: 16px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ship-c {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 2px solid rgba(255, 255, 255, 0.22);
+  border-radius: 13px;
+  padding: 9px 15px;
+  font-weight: 700;
+  font-size: 14.5px;
+}
+
+.flag {
+  font-size: 21px;
+  line-height: 1;
+}
+
+/* -------------------------------------------------------- controls */
+
+.controls {
+  background: var(--band);
+  border-bottom: 2px solid var(--edge);
+  position: relative;
+  z-index: 5;
+}
+
+.controls .wrap {
+  padding-block: 13px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.search {
+  position: relative;
+  flex: 1 1 240px;
+  min-width: 0;
+}
+
+.search svg {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 16px;
+  height: 16px;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+input[type='search'],
+select {
+  width: 100%;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--ink);
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: 12px;
+  padding: 10px 13px;
+  appearance: none;
+}
+
+input[type='search'] { padding-left: 38px; }
+
+select {
+  padding-right: 36px;
+  font-weight: 600;
+}
+
+.sort {
+  position: relative;
+  flex: 0 1 230px;
+  min-width: 172px;
+}
+
+.sort::after {
+  content: '';
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-right: 2.5px solid var(--ink);
+  border-bottom: 2.5px solid var(--ink);
+  transform: translateY(-70%) rotate(45deg);
+  pointer-events: none;
+}
+
+.count {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ------------------------------------------------------------ grid */
+
+main .wrap { padding-block: 26px 46px; }
+
+.grid {
+  display: grid;
+  gap: 18px;
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 1060px) { .grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 780px)  { .grid { grid-template-columns: repeat(2, 1fr); gap: 13px; } }
+
+/* Two-up holds all the way down to the narrowest phone. The card tuning for
+   that narrow column lives after the card rules below, so it wins the cascade. */
+
+.card {
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: 18px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  box-shadow: var(--card-sh);
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 0 var(--edge), 0 20px 36px -18px rgba(69, 6, 47, 0.6);
+}
+
+/* the picture is the button that opens the 360 view */
+.card-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  border-bottom: 2px solid var(--edge);
+  border-radius: 0;
+  background: none;
+  cursor: zoom-in;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.card-art:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: -4px;
+}
+
+/* shown until the render or photo arrives */
+.art-placeholder {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 32%, #fff0d4 0%, #f4d9a8 52%, #e0bc80 100%);
+}
+
+.picture {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+}
+
+.picture.in,
+.picture.is-photo { opacity: 1; }
+
+.unit-chip {
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  z-index: 3;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  color: var(--ink);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 999px;
+}
+
+.card-body {
+  padding: 13px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+}
+
+/* brand sits above the product name, the way a shop lists a maker */
+.card-brand {
+  margin: 0 0 -2px;
+  font-size: 11.5px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--hot);
+}
+
+.card-title {
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 20px;
+  line-height: 1.14;
+  margin: 0;
+  letter-spacing: -0.015em;
+  text-wrap: balance;
+}
+
+.card-desc {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--ink-soft);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-foot {
+  margin-top: auto;
+  padding-top: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.price {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 25px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+
+.price .rs {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  margin-right: 3px;
+}
+
+.price .per {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ink-soft);
+  font-family: var(--body);
+  margin-left: 6px;
+}
+
+.wa {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  background: var(--wa);
+  color: var(--wa-ink);
+  text-decoration: none;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 9px 12px;
+  border: 2px solid var(--edge);
+  border-radius: 11px;
+  box-shadow: 0 2px 0 var(--edge);
+}
+
+.wa:active {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.wa svg {
+  width: 16px;
+  height: 16px;
+  flex: none;
+}
+
+.empty {
+  text-align: center;
+  padding: 64px 0;
+  color: var(--ink-soft);
+}
+
+.empty h2 {
+  font-family: var(--display);
+  color: var(--ink);
+  margin: 0 0 6px;
+  font-size: 26px;
+}
+
+/* ------------------------------------------- phone: two cards per row ----
+   Placed after the card rules on purpose, so these overrides win. The
+   column is roughly 145px wide at 375px, so everything in it shrinks. */
+@media (max-width: 560px) {
+  .grid { gap: 10px; }
+
+  .card { border-radius: 14px; }
+  .card-body { padding: 10px 10px 11px; gap: 3px; }
+
+  .card-brand { font-size: 9.5px; letter-spacing: 0.05em; }
+  .card-title { font-size: 15.5px; line-height: 1.15; }
+
+  /* too narrow to carry body copy - the name and price are what gets
+     scanned here, and the full description is one tap away */
+  .card-desc { display: none; }
+
+  .card-foot { padding-top: 7px; gap: 7px; }
+  .price { font-size: 19px; }
+  .price .rs { font-size: 10.5px; margin-right: 2px; }
+  .price .per { font-size: 10.5px; margin-left: 4px; }
+
+  .wa {
+    font-size: 11.5px;
+    padding: 9px 6px;
+    gap: 5px;
+    border-radius: 10px;
+    white-space: nowrap;
+  }
+  .wa svg { width: 14px; height: 14px; }
+
+  .unit-chip {
+    font-size: 9.5px;
+    padding: 2px 7px;
+    left: 7px;
+    top: 7px;
+    border-width: 1.5px;
+  }
+}
+
+@media (max-width: 374px) {
+  .grid { gap: 8px; }
+  .card-title { font-size: 14.5px; }
+  .price { font-size: 18px; }
+
+  /* "Order on WhatsApp" is wider than the card here, so the card buttons
+     drop to "Order". The header and the 360 dialog keep the full label. */
+  .grid .wa { font-size: 12px; padding: 9px 6px; }
+  .grid .wa .wa-tail { display: none; }
+}
+
+/* -------------------------------------------------------- 360 view */
+
+.lb {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  background: rgba(20, 5, 14, 0.84);
+  backdrop-filter: blur(6px);
+  padding: calc(16px + env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px))
+    calc(16px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px));
+}
+
+.lb-inner {
+  margin: auto;
+  width: 100%;
+  max-width: 680px;
+  display: flex;
+  flex-direction: column;
+  background: var(--surface);
+  border: 2px solid var(--edge);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 30px 70px -18px rgba(0, 0, 0, 0.75);
+}
+
+.lb-head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 12px;
+  padding: 13px 15px;
+  border-bottom: 2px solid var(--edge);
+}
+
+.lb-brand {
+  margin: 0 0 -1px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--hot);
+}
+
+.lb-title {
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 21px;
+  margin: 0;
+  letter-spacing: -0.015em;
+}
+
+
+.lb-headings {
+  min-width: 0;
+  margin-right: auto;
+}
+
+.lb-close {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--band);
+  color: var(--ink);
+  border: 2px solid var(--edge);
+  border-radius: 11px;
+  padding: 8px 15px;
+  box-shadow: 0 2px 0 var(--edge);
+}
+
+.lb-close:hover { border-color: var(--sun); }
+
+.lb-stage {
+  width: 100%;
+  aspect-ratio: 1;
+  max-height: 62vh;
+  cursor: grab;
+  background: radial-gradient(circle at 40% 32%, #fff0d4 0%, #f4d9a8 52%, #dfb97b 100%);
+}
+
+.lb-stage.grabbing { cursor: grabbing; }
+
+.lb-stage canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
+.lb-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 13px 15px;
+  border-top: 2px solid var(--edge);
+}
+
+.lb-price {
+  margin: 0;
+  font-family: var(--display);
+  font-weight: 800;
+  font-size: 22px;
+}
+
+.lb-foot .wa {
+  margin-left: auto;
+  flex: 0 1 auto;
+  padding-inline: 20px;
+}
+
+body.lb-open { overflow: hidden; }
+
+/* ---------------------------------------------------------- footer */
+
+footer {
+  background: var(--band);
+  border-top: 2px solid var(--edge);
+}
+
+footer .wrap {
+  padding-block: 30px 34px;
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+}
+
+footer h2 {
+  font-family: var(--display);
+  font-size: 18px;
+  margin: 0 0 7px;
+}
+
+footer p,
+footer li {
+  margin: 0 0 4px;
+  font-size: 13.5px;
+  color: var(--ink-soft);
+}
+
+footer ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.phone {
+  font-family: var(--display);
+  font-size: 23px;
+  font-weight: 800;
+  color: var(--ink);
+  user-select: all;
+}
+
+.copy {
+  margin-top: 9px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  background: var(--surface);
+  color: var(--ink);
+  border: 2px solid var(--edge);
+  border-radius: 11px;
+  padding: 8px 14px;
+  box-shadow: 0 2px 0 var(--edge);
+}
+
+.copy:hover { border-color: var(--sun); }
+
+.legal {
+  background: var(--deep);
+  color: var(--deep-ink);
+}
+
+.legal .wrap {
+  padding-block: 15px 19px;
+  display: block;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
