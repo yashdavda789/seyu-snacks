@@ -47,53 +47,21 @@
   padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg: #171310;
-    --band: #201a15;
-    --surface: #221c17;
-    --line: #342b23;
-    --edge: #342b23;
-    --ink: #f6efe5;
-    --ink-soft: #ab9b88;
-    --cocoa: #a06b3c;
-    --cocoa-ink: #fdf8f1;
-    --hot: #ef9d4d;
-    --sun: #f0b45a;
-    --deep: #100c09;
-    --deep-ink: #f6efe5;
-    --deep-line: rgba(246, 239, 229, 0.16);
-    --wa: #27b265;
-    --sweep: linear-gradient(170deg, #ffffff 0%, #fdfbf7 55%, #f6f1e8 100%);
-    --sh-1: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 20px -12px rgba(0, 0, 0, 0.7);
-    --sh-2: 0 2px 6px rgba(0, 0, 0, 0.5), 0 22px 40px -20px rgba(0, 0, 0, 0.8);
-    --sh-3: 0 30px 70px -26px rgba(0, 0, 0, 0.9);
-    color-scheme: dark;
-  }
-}
+/* ---------------------------------------------------------------------
+   THE SITE IS LIGHT, ALWAYS.
 
-:root[data-theme='dark'] {
-  --bg: #171310;
-  --band: #201a15;
-  --surface: #221c17;
-  --line: #342b23;
-  --edge: #342b23;
-  --ink: #f6efe5;
-  --ink-soft: #ab9b88;
-  --cocoa: #a06b3c;
-  --cocoa-ink: #fdf8f1;
-  --hot: #ef9d4d;
-  --sun: #f0b45a;
-  --deep: #100c09;
-  --deep-ink: #f6efe5;
-  --deep-line: rgba(246, 239, 229, 0.16);
-  --wa: #27b265;
-  --sweep: linear-gradient(170deg, #ffffff 0%, #fdfbf7 55%, #f6f1e8 100%);
-  --sh-1: 0 1px 2px rgba(0, 0, 0, 0.45), 0 8px 20px -12px rgba(0, 0, 0, 0.7);
-  --sh-2: 0 2px 6px rgba(0, 0, 0, 0.5), 0 22px 40px -20px rgba(0, 0, 0, 0.8);
-  --sh-3: 0 30px 70px -26px rgba(0, 0, 0, 0.9);
-  color-scheme: dark;
-}
+   There used to be a `@media (prefers-color-scheme: dark)` block here. It
+   meant a phone with Chrome set to dark opened the shop in near-black,
+   which is not what anyone was shown or asked for.
+
+   It also could not have worked. Every product picture is a 3D render with
+   a near-white backdrop baked into it (studio.js -> backdrop()), and JPEG
+   has no transparency, so on a dark page you get 48 white squares. Any
+   future dark mode has to re-render all of them, not just swap tokens.
+
+   `color-scheme: light` on :root above is the other half: it stops the
+   browser darkening form controls, scrollbars and autofill on its own.
+   --------------------------------------------------------------------- */
 
 * {
   box-sizing: border-box;
