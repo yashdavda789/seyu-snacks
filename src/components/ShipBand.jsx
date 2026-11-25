@@ -10,7 +10,7 @@ import { CITIES, COUNTRIES, DELIVERY_DAYS, DOMESTIC_DAYS } from '../data/product
  */
 export default function ShipBand() {
   return (
-    <section className="ship">
+    <section className="ship" id="ship">
       <div className="wrap">
         <div className="ship-head">
           <h2>Across India, and to {COUNTRIES.length} countries</h2>

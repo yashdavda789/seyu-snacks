@@ -1,14 +1,17 @@
 import WhatsAppIcon from './WhatsAppIcon.jsx'
-import { brandOf, formatPrice, whatsappLink } from '../data/products.js'
+import { formatPrice, whatsappLink } from '../data/products.js'
 
 /**
  * The picture layer falls back in three steps: a real photograph if one
  * exists, otherwise the 3D render once it finishes, otherwise a tinted
  * placeholder.
  *
- * The picture itself is the button that opens the 360 view - a real <button>
- * rather than a clickable div, so it is reachable by keyboard and announced
- * properly by screen readers without needing a visible badge.
+ * The picture itself is the button that opens the larger view - a real
+ * <button> rather than a clickable div, so it is reachable by keyboard and
+ * announced properly without needing a visible badge.
+ *
+ * Name and price sit bottom left, the order button bottom right, the way a
+ * shop lists a shelf.
  */
 export default function ProductCard({ product, photo, shot, onSpin }) {
   const picture = photo ?? shot
@@ -18,7 +21,7 @@ export default function ProductCard({ product, photo, shot, onSpin }) {
       <button
         type="button"
         className="card-art"
-        aria-label={`View ${product.title} in 360 degrees`}
+        aria-label={`View ${product.title} close up`}
         onClick={() => onSpin(product)}
       >
         <span className="art-placeholder" aria-hidden="true" />
@@ -34,24 +37,24 @@ export default function ProductCard({ product, photo, shot, onSpin }) {
       </button>
 
       <div className="card-body">
-        <p className="card-brand">{brandOf(product)}</p>
-        <h3 className="card-title">{product.title}</h3>
-        <p className="card-desc">{product.desc}</p>
-        <div className="card-foot">
+        <div className="card-lines">
+          <h3 className="card-title">{product.title}</h3>
           <p className="price">
             <span className="rs">Rs.</span>
             {formatPrice(product.price)}
             <span className="per">/ {product.unit}</span>
           </p>
-          <a className="wa" href={whatsappLink(product)} target="_blank" rel="noopener noreferrer">
-            <WhatsAppIcon />
-            {/* the tail is dropped on very narrow phones, where the full
-                label is wider than the card; the icon still says where it goes */}
-            <span>
-              Order<span className="wa-tail"> on WhatsApp</span>
-            </span>
-          </a>
         </div>
+
+        <a
+          className="card-buy"
+          href={whatsappLink(product)}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Order ${product.title} on WhatsApp`}
+        >
+          <WhatsAppIcon />
+        </a>
       </div>
     </article>
   )

@@ -46,7 +46,9 @@ export function useThumbnails(products, skipIds = new Set()) {
 
       const product = queue[i++]
       try {
-        const url = studio.thumbnail(product)
+        // a few pieces caught in the air, the same as the hero - it is what
+        // stops a grid of 48 bowls reading as 48 identical bowls
+        const url = studio.thumbnail(product, { scatter: true, pull: 0.9 })
         if (url) {
           pending[product.id] = url
           done.current.add(product.id)

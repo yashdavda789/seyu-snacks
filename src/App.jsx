@@ -2,6 +2,8 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import Header, { Ticker } from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
 import ShipBand from './components/ShipBand.jsx'
+import Steps from './components/Steps.jsx'
+import Story from './components/Story.jsx'
 import Controls from './components/Controls.jsx'
 import ProductCard from './components/ProductCard.jsx'
 import SpinModal from './components/SpinModal.jsx'
@@ -63,11 +65,17 @@ export default function App() {
       <Ticker />
       <Header />
       <Hero count={PRODUCTS.length} />
-      <ShipBand />
-      <Controls query={query} onQuery={setQuery} shown={matches.length} />
+      <Steps />
 
       <main id="main">
         <div className="wrap">
+          <div className="sec-head">
+            <h2>Our most-loved snacks</h2>
+            <p>Tried, tasted and trusted &mdash; fried fresh every morning, sealed the same day.</p>
+          </div>
+
+          <Controls query={query} onQuery={setQuery} shown={matches.length} />
+
           {matches.length > 0 ? (
             <>
               <div className="grid" ref={gridRef}>
@@ -92,9 +100,9 @@ export default function App() {
 
                 {left > 0 ? (
                   <button className="more-btn" type="button" onClick={viewMore}>
-                    View {Math.min(left, PAGE)} more
+                    View More
                     <span className="more-arrow" aria-hidden="true">
-                      ↓
+                      →
                     </span>
                   </button>
                 ) : (
@@ -116,6 +124,8 @@ export default function App() {
         </div>
       </main>
 
+      <Story />
+      <ShipBand />
       <OrderForm />
       <Footer />
       <FloatingOrder />

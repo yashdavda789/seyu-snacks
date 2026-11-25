@@ -304,26 +304,21 @@ function backdrop() {
   c.width = c.height = 512
   const g = c.getContext('2d')
 
+  // Near-white, matched to the card it sits on, so the product looks cut out
+  // rather than framed in a window. The card colour is --surface in the
+  // stylesheet; change one and change the other.
   const sweep = g.createLinearGradient(0, 0, 0, 512)
   sweep.addColorStop(0, '#FFFFFF')
-  sweep.addColorStop(0.46, '#FBF6EE')
-  sweep.addColorStop(0.62, '#F2E9DA')
-  sweep.addColorStop(1, '#E3D4BD')
+  sweep.addColorStop(0.55, '#FDFBF7')
+  sweep.addColorStop(1, '#F6F1E8')
   g.fillStyle = sweep
   g.fillRect(0, 0, 512, 512)
 
-  // a soft pool of light where the product stands
-  const pool = g.createRadialGradient(236, 214, 10, 256, 256, 320)
-  pool.addColorStop(0, 'rgba(255,255,255,0.85)')
-  pool.addColorStop(1, 'rgba(255,255,255,0)')
+  // the faintest warm pool where the product stands
+  const pool = g.createRadialGradient(240, 220, 10, 256, 258, 300)
+  pool.addColorStop(0, 'rgba(255, 255, 255, 0.9)')
+  pool.addColorStop(1, 'rgba(255, 255, 255, 0)')
   g.fillStyle = pool
-  g.fillRect(0, 0, 512, 512)
-
-  // and a gentle vignette
-  const vig = g.createRadialGradient(256, 256, 180, 256, 256, 400)
-  vig.addColorStop(0, 'rgba(126, 96, 58, 0)')
-  vig.addColorStop(1, 'rgba(126, 96, 58, 0.22)')
-  g.fillStyle = vig
   g.fillRect(0, 0, 512, 512)
 
   const tex = new THREE.CanvasTexture(c)
@@ -439,7 +434,7 @@ class Studio {
     fill.position.set(5.4, 2.6, 4.2)
     this.scene.add(fill)
 
-    // and a warm edge from behind, which is what separates the bowl from the sweep
+    // a warm edge from behind, which is what separates the bowl from the sweep
     const rim = new THREE.DirectionalLight(0xffd9ae, 0.85)
     rim.position.set(1.2, 3.4, -5.6)
     this.scene.add(rim)
@@ -448,7 +443,7 @@ class Studio {
     // so it lands on the painted sweep without a visible plane edge.
     const ground = new THREE.Mesh(
       new THREE.CircleGeometry(7, 64),
-      new THREE.ShadowMaterial({ color: 0x4a3418, opacity: 0.36 }),
+      new THREE.ShadowMaterial({ color: 0x4a3418, opacity: 0.33 }),
     )
     ground.rotation.x = -Math.PI / 2
     ground.position.y = GROUND
@@ -610,7 +605,41 @@ class Studio {
     }
   }
 
-  compose(product) {
+  /**
+   * Pieces caught in the air above the bowl, as if the shot were taken while
+   * someone was still pouring. Only the hero uses this - on a 240px card it
+   * would read as dirt on the lens.
+   */
+  airborne(kind, tones, cy, radius, height, count) {
+    const build = FOOD[kind] ?? FOOD.mix
+    for (let v = 0; v < 8; v++) {
+      const mesh = new THREE.InstancedMesh(build(v), food(tones[v]), count)
+      mesh.castShadow = false
+      for (let i = 0; i < count; i++) {
+        const a = Math.random() * Math.PI * 2
+        // pushed outward, so the middle stays clear and the bowl reads
+        const rr = (0.35 + Math.random() * 0.65) * radius
+        this.dummy.position.set(
+          Math.cos(a) * rr,
+          cy + Math.random() * height,
+          Math.sin(a) * rr * 0.6,
+        )
+        this.dummy.rotation.set(
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+          Math.random() * Math.PI * 2,
+        )
+        const s = 0.8 + Math.random() * 0.4
+        this.dummy.scale.set(s, s, s)
+        this.dummy.updateMatrix()
+        mesh.setMatrixAt(i, this.dummy.matrix)
+      }
+      mesh.instanceMatrix.needsUpdate = true
+      this.rig.add(mesh)
+    }
+  }
+
+  compose(product, { scatter = false } = {}) {
     this.clearRig()
     const info = woodBowl(this.rig, product.vessel ?? 0)
     const tones = TONES[product.tone] ?? TONES.golden
@@ -618,21 +647,39 @@ class Studio {
 
     this.pile(product.kind, tones, info.fillY, info.fillR, cfg.h, cfg.count)
     this.garnish(info.fillY, info.fillR, cfg.h)
+    if (scatter) this.airborne(product.kind, tones, info.fillY + 1.05, info.fillR * 1.7, 2.5, 4)
 
     this.rig.rotation.set(0, -0.55, 0)
     this.spin.pitch = this.spin.target = PITCH
     this.applyCamera()
   }
 
-  /** Render one product to a still JPEG data URL. */
-  thumbnail(product) {
+  /**
+   * Render one product to a still JPEG data URL.
+   *
+   * `size` is the square pixel size, `scatter` adds the airborne pieces and
+   * `pull` moves the camera back, which the hero needs so the scatter does
+   * not run off the edges.
+   */
+  thumbnail(product, { size = THUMB, scatter = false, pull = 0 } = {}) {
     if (!this.init()) return null
-    this.compose(product)
-    this.renderer.setSize(THUMB, THUMB, false)
+    this.compose(product, { scatter })
+
+    if (pull) {
+      const p = this.spin.pitch
+      const d = CAM_DIST + pull
+      this.camera.position.set(0, Math.sin(p) * d, Math.cos(p) * d)
+      this.camera.lookAt(0, -0.16, 0)
+    }
+
+    this.renderer.setSize(size, size, false)
     this.camera.aspect = 1
     this.camera.updateProjectionMatrix()
     this.renderer.render(this.scene, this.camera)
-    return this.renderer.domElement.toDataURL('image/jpeg', 0.86)
+    const url = this.renderer.domElement.toDataURL('image/jpeg', 0.88)
+
+    if (pull) this.applyCamera()
+    return url
   }
 
   /** Put the live canvas into `el` and start turning `product`. */

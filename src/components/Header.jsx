@@ -1,10 +1,16 @@
 import Logo from './Logo.jsx'
-import WhatsAppIcon from './WhatsAppIcon.jsx'
-import { GENERAL_WHATSAPP } from '../data/products.js'
 
 const TICKER =
   'FRESH BATCHES DAILY ✦ DELIVERED ANYWHERE IN INDIA IN 2–4 DAYS ✦ ' +
-  'AND TO 5 COUNTRIES WORLDWIDE ✦ SPIN ANY SNACK IN 360° ✦ ORDER ON WHATSAPP ✦ '
+  'AND TO 5 COUNTRIES WORLDWIDE ✦ ORDER ON WHATSAPP ✦ '
+
+// every one of these points at a section that exists on the page
+const NAV = [
+  { href: '#main', label: 'Products' },
+  { href: '#story', label: 'Story' },
+  { href: '#how', label: 'Manufacturing' },
+  { href: '#ship', label: 'Packaging' },
+]
 
 export function Ticker() {
   return (
@@ -21,19 +27,20 @@ export default function Header() {
   return (
     <header className="shop">
       <div className="wrap">
-        <div className="brand">
+        <a className="brand" href="#main">
           <Logo />
-          <div>
-            <p className="brand-name">
-              Seyu Snacks <em>&amp;</em> Namkeen
-            </p>
-            <p className="brand-sub">Namkeen &middot; Chivda &middot; Sweets</p>
-          </div>
-        </div>
-        <a className="call" href={GENERAL_WHATSAPP} target="_blank" rel="noopener noreferrer">
-          <WhatsAppIcon />
-          <span>Order on WhatsApp</span>
+          <span className="brand-name">
+            Seyu Snacks <em>&amp;</em> Namkeen
+          </span>
         </a>
+
+        <nav className="nav" aria-label="Sections">
+          {NAV.map((n) => (
+            <a key={n.href} href={n.href}>
+              {n.label}
+            </a>
+          ))}
+        </nav>
       </div>
     </header>
   )

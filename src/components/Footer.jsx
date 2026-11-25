@@ -22,7 +22,7 @@ export default function Footer() {
 
   return (
     <>
-      <footer>
+      <footer id="contact">
         <div className="wrap">
           <div>
             <h2>Seyu Snacks &amp; Namkeen</h2>
