@@ -24,17 +24,24 @@ idle slot so the page stays responsive. Tapping a product hands that same
 context to the 360 dialog, where it spins live. One context does all of it —
 48 canvases would melt a phone.
 
-Tapping any product opens straight into its 360 view — same behaviour for
+Tapping any product opens straight into its larger view — same behaviour for
 every item, no intermediate step.
 
-A product's card picture falls back in three steps:
+What shows, on the card and in that larger view, is decided once by what is
+in `src/photos/`:
 
-1. a real photograph, if one is in `src/photos/`
-2. the 3D render, once it finishes
-3. a tinted placeholder, until then
+| In `src/photos/` | Card | Opened view |
+|---|---|---|
+| `slug/01.jpg … slug/24.jpg` | frame 01 | photographic 360, drag to turn |
+| `slug.jpg` | that photo | that photo, still |
+| nothing | the 3D model | the 3D model, drag to spin |
 
-Out of the box no photographs are in use, so every card shows its own 3D
-render and the 360 shows that same model. Card and 360 always match.
+Both places read the same source, so the card and the opened view always
+match. Replacing a photo changes both at once.
+
+A single photograph cannot spin — one image holds one angle. To get a
+photographic 360, shoot the product on a turntable and number the frames;
+`src/photos/README.md` has the full method.
 
 ---
 
@@ -70,26 +77,55 @@ render and the 360 shows that same model. Card and 360 always match.
 
 ### Adding real photographs
 
-Drop an image into `src/photos/` named after the product's slug:
+`src/photos/` already holds one folder per product, named after it. Drop 24
+photos shot all the way round into a folder and that product turns in 360:
 
 ```
-src/photos/bikaneri-bhujia.jpg
+src/photos/bikaneri-bhujia/01.jpg
+src/photos/bikaneri-bhujia/02.jpg
+...
+src/photos/bikaneri-bhujia/24.jpg
 ```
 
-That's the whole step. Vite picks it up at build time, so the page never
-requests a photo that isn't there. `.jpg`, `.jpeg`, `.png` and `.webp` all
-work. Square, around 800x800, fits the card best. Products without a photo
-keep their render — you can add them one at a time.
+That's the whole step — nothing to register, nothing to import. Frame `01`
+becomes the picture on the main page.
 
-**To change a photo later**, overwrite that file with a new one of the same
+| | Size | Weight | How many |
+|---|---|---|---|
+| **360 view** | **800 × 800** square | under **90 KB** each | **24** |
+| Single photo, no turn | 1200 × 1200 square | under 250 KB | 1 |
+
+For a still picture instead, leave one file loose, outside the folders:
+`src/photos/bikaneri-bhujia.jpg`. It shows on the card and in the opened
+view but will not turn — one photograph holds one angle.
+
+```bash
+npm run photos                # what all 48 are showing, and what to fix
+npm run photos -- --shotlist  # the running order for a photo session
+npm run photos -- --init      # recreate the 48 folders
+
+# import a whole shoot: crops square, resizes, files under the right name
+python3 -I scripts/square.py --batch ~/photos --order docs/shot-order.txt
+```
+
+The 3D renders are **placeholders**. They cannot look photographic — see
+[docs/product-photography.md](docs/product-photography.md) for what to shoot
+instead and how.
+
+`npm run photos` reads every file's real dimensions and flags wrong
+filenames, non-square pictures and anything heavy enough to slow the page.
+
+**To change a photo later**, overwrite the file with a new one of the same
 name. If you change the extension — say `.jpg` to `.png` — delete the old
 file, or the old one keeps winning. While `npm run dev` is running, a new or
 replaced file shows up immediately; no restart needed.
 
-**One thing to know:** a photograph replaces the card picture only. The 360
-still shows the 3D model, so that product's card and its 360 stop being the
-same image. Every product without a photo keeps both in step. A sample photo
-is parked in `samples/` if you want to try it — see `samples/README.md`.
+**The same files drive both views.** What is in that folder shows on the card
+*and* in the view that opens when the product is tapped, so the two can never
+disagree. Replace a frame and both change at once.
+
+A product with no photograph shows its 3D model in both places instead, and
+that model can be spun and tilted.
 
 ### Colours and type
 
@@ -125,7 +161,7 @@ src/
   data/products.js       catalogue, WhatsApp link builder, countries
   three/studio.js        the 3D studio: models, lighting, spin
   hooks/useThumbnails.js renders each product to a still, progressively
-  photos/                drop real photographs here (see above)
+  photos/                one folder per product - drop photos in (see above)
   components/            Header, Hero, ShipBand, Controls, ProductCard,
                          SpinModal, Footer, Logo, WhatsAppIcon
   styles.css             design tokens and all layout

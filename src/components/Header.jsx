@@ -3,8 +3,8 @@ import WhatsAppIcon from './WhatsAppIcon.jsx'
 import { GENERAL_WHATSAPP } from '../data/products.js'
 
 const TICKER =
-  'FRESH BATCHES DAILY ✦ SHIPPING TO 5 COUNTRIES ✦ DELIVERY IN 5–7 DAYS ✦ ' +
-  'SPIN ANY SNACK IN 360° ✦ ORDER ON WHATSAPP ✦ '
+  'FRESH BATCHES DAILY ✦ DELIVERED ANYWHERE IN INDIA IN 2–4 DAYS ✦ ' +
+  'AND TO 5 COUNTRIES WORLDWIDE ✦ SPIN ANY SNACK IN 360° ✦ ORDER ON WHATSAPP ✦ '
 
 export function Ticker() {
   return (
@@ -27,7 +27,7 @@ export default function Header() {
             <p className="brand-name">
               Seyu Snacks <em>&amp;</em> Namkeen
             </p>
-            <p className="brand-sub">Farsan &middot; Chivda &middot; Mithai</p>
+            <p className="brand-sub">Namkeen &middot; Chivda &middot; Sweets</p>
           </div>
         </div>
         <a className="call" href={GENERAL_WHATSAPP} target="_blank" rel="noopener noreferrer">

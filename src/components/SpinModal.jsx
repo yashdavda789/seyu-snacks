@@ -1,27 +1,49 @@
 import { useEffect, useRef } from 'react'
 import WhatsAppIcon from './WhatsAppIcon.jsx'
+import PhotoSpin from './PhotoSpin.jsx'
 import { studio } from '../three/studio.js'
 import { brandOf, formatPrice, whatsappLink } from '../data/products.js'
 
 /**
- * Tapping any product opens straight into its 360 view - same behaviour for
- * every item, no intermediate step.
+ * The product view. Three cases, decided only by what is in src/photos/:
  *
- * Hands the shared WebGL canvas to this dialog while it is open, then gives
- * it back on close. Drag with mouse or finger to spin; arrow keys work too.
+ *   several numbered frames -> a photographic 360, drag to turn
+ *   one photo               -> that photo, still
+ *   no photo                -> the 3D model, drag to spin
+ *
+ * Whatever shows here is what the card shows, so the two never disagree.
  */
-export default function SpinModal({ product, onClose }) {
+export default function SpinModal({ product, frames = [], onClose }) {
+  const photo = frames[0] ?? null
+  const spinnablePhoto = frames.length > 1
   const stageRef = useRef(null)
   const closeRef = useRef(null)
 
+  // Escape, body scroll lock and focus apply to both kinds of view
   useEffect(() => {
+    if (!product) return
+    closeRef.current?.focus()
+    document.body.classList.add('lb-open')
+
+    const onKey = (e) => {
+      if (e.key === 'Escape') onClose()
+    }
+    document.addEventListener('keydown', onKey)
+
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.classList.remove('lb-open')
+    }
+  }, [product, onClose])
+
+  // the WebGL canvas is only built when there is no photograph to show
+  useEffect(() => {
+    if (!product || photo) return
     const stage = stageRef.current
-    if (!stage || !product) return
+    if (!stage) return
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false
     studio.attach(stage, product, { reducedMotion: reduced })
-    closeRef.current?.focus()
-    document.body.classList.add('lb-open')
 
     let last = null
     const point = (e) => (e.touches ? e.touches[0] : e)
@@ -57,8 +79,7 @@ export default function SpinModal({ product, onClose }) {
     window.addEventListener('resize', resize)
 
     const onKey = (e) => {
-      if (e.key === 'Escape') onClose()
-      else if (e.key === 'ArrowLeft') { studio.nudge(-1); e.preventDefault() }
+      if (e.key === 'ArrowLeft') { studio.nudge(-1); e.preventDefault() }
       else if (e.key === 'ArrowRight') { studio.nudge(1); e.preventDefault() }
       else if (e.key === 'ArrowUp') { studio.tiltBy(-0.06); e.preventDefault() }
       else if (e.key === 'ArrowDown') { studio.tiltBy(0.06); e.preventDefault() }
@@ -74,10 +95,9 @@ export default function SpinModal({ product, onClose }) {
       window.removeEventListener('touchend', up)
       window.removeEventListener('resize', resize)
       document.removeEventListener('keydown', onKey)
-      document.body.classList.remove('lb-open')
       studio.detach()
     }
-  }, [product, onClose])
+  }, [product, photo])
 
   if (!product) return null
 
@@ -86,7 +106,11 @@ export default function SpinModal({ product, onClose }) {
       className="lb"
       role="dialog"
       aria-modal="true"
-      aria-label={`${product.title}, 360 degree view. Drag, or use the arrow keys, to rotate.`}
+      aria-label={
+        photo
+          ? `${product.title}, photograph`
+          : `${product.title}, 3D view. Drag, or use the arrow keys, to rotate.`
+      }
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose()
       }}
@@ -102,7 +126,15 @@ export default function SpinModal({ product, onClose }) {
           </button>
         </div>
 
-        <div className="lb-stage" ref={stageRef} />
+        {spinnablePhoto ? (
+          <PhotoSpin frames={frames} alt={product.title} />
+        ) : photo ? (
+          <div className="lb-stage is-photo">
+            <img className="lb-photo" src={photo} alt={product.title} />
+          </div>
+        ) : (
+          <div className="lb-stage" ref={stageRef} />
+        )}
 
         <div className="lb-foot">
           <p className="lb-price">

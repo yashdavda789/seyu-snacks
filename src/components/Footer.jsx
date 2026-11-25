@@ -1,5 +1,11 @@
 import { useState } from 'react'
-import { COUNTRIES, WHATSAPP_DISPLAY, DELIVERY_DAYS } from '../data/products.js'
+import {
+  CITIES,
+  COUNTRIES,
+  DELIVERY_DAYS,
+  DOMESTIC_DAYS,
+  WHATSAPP_DISPLAY,
+} from '../data/products.js'
 
 export default function Footer() {
   const [label, setLabel] = useState('Copy number')
@@ -21,7 +27,8 @@ export default function Footer() {
           <div>
             <h2>Seyu Snacks &amp; Namkeen</h2>
             <p>
-              Traditional Gujarati and Maharashtrian farsan, fried fresh and packed the same day.
+              Namkeen, chivda, sev and sweets, fried fresh and packed the same day. Delivered
+              anywhere in India and to {COUNTRIES.length} countries.
             </p>
           </div>
 
@@ -43,10 +50,16 @@ export default function Footer() {
           </div>
 
           <div>
-            <h2>International</h2>
+            <h2>Where we deliver</h2>
             <ul>
-              <li>{COUNTRIES.map((c) => c.name).join(' · ')}</li>
-              <li>Delivered in {DELIVERY_DAYS}</li>
+              <li>
+                <strong>India</strong> &middot; {CITIES.slice(0, 4).join(' · ')} and every other pin
+                code, in {DOMESTIC_DAYS}
+              </li>
+              <li>
+                <strong>Overseas</strong> &middot; {COUNTRIES.map((c) => c.name).join(' · ')}, in{' '}
+                {DELIVERY_DAYS}
+              </li>
               <li>Message us for shipping rates</li>
             </ul>
           </div>
