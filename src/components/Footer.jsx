@@ -26,7 +26,7 @@ const SOCIAL = [
 
 export default function Footer({ onJump }) {
   const year = new Date().getFullYear()
-
+//
   return (
     <footer id="contact">
       <div className="wrap foot-top">
