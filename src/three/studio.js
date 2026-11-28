@@ -110,9 +110,41 @@ export const FOOD = {
     return new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 60, 0.042, 5, false)
   },
 
+  /**
+   * Bhakarwadi: a sheet of dough rolled up with filling and sliced, so the
+   * cut face is a spiral and the piece is a short fat barrel. A plain
+   * cylinder reads as a coin, which is what it looked like before.
+   *
+   * Built as a spiral strip extruded along its axis - the strip's own
+   * walls become the swirl you see on both ends.
+   */
   wheel: (v) => {
-    const r = 0.23 + (v % 4) * 0.035
-    return new THREE.CylinderGeometry(r, r, 0.16, 20)
+    const turns = 2.3 + (v % 3) * 0.35
+    const R = 0.29 + (v % 4) * 0.03
+    const w = 0.052 // thickness of the rolled sheet
+    const steps = 76
+    const pts = []
+
+    const edge = (t, off) => {
+      const a = t * turns * Math.PI * 2
+      const r = R * (0.2 + 0.8 * t) + off
+      return new THREE.Vector2(Math.cos(a) * r, Math.sin(a) * r)
+    }
+
+    for (let i = 0; i <= steps; i++) pts.push(edge(i / steps, w / 2))
+    for (let i = steps; i >= 0; i--) pts.push(edge(i / steps, -w / 2))
+
+    const g = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
+      depth: 0.34 + (v % 3) * 0.04,
+      bevelEnabled: true,
+      bevelSize: 0.018,
+      bevelThickness: 0.018,
+      bevelSegments: 2,
+      curveSegments: 1,
+    })
+    g.center()
+    g.rotateX(Math.PI / 2) // lay it on its side, the way it falls in a bowl
+    return g
   },
 
   // a genuine mixture: flake, peanut, strand, lentil
@@ -145,7 +177,10 @@ export const SETTLE = {
   crescent: { tilt: 0.7, count: 105, h: 0.68 },
   cashew: { tilt: 0.8, count: 140, h: 0.64 },
   spiral: { tilt: 0.34, count: 65, h: 0.56 },
-  wheel: { tilt: 0.45, count: 130, h: 0.66 },
+  // Rolls tumble every which way, and they are bulky. `count` is per
+  // variant and there are eight, so 13 here is already ~100 pieces -
+  // any more and they spill out over the rim.
+  wheel: { tilt: 3.14, count: 13, h: 0.46 },
   mix: { tilt: 1.0, count: 245, h: 0.74 },
 }
 
@@ -165,118 +200,79 @@ const food = (col) =>
     clearcoatRoughness: 0.36,
   })
 
-/* -------------------------------------------------------------------- wood */
+/* ----------------------------------------------------------------- ceramic */
 
-/** Turned-wood grain, painted once and shared by every bowl. */
-let woodTex = null
-function wood() {
-  if (woodTex) return woodTex
+/**
+ * Glazed ceramic, the pale bowl the design uses. Almost plain on purpose -
+ * the bowl is meant to disappear and let the food carry the picture. The
+ * faint mottling is only there so the glaze does not read as flat plastic.
+ */
+let clayTex = null
+function clay() {
+  if (clayTex) return clayTex
 
   const c = document.createElement('canvas')
-  c.width = 1024
-  c.height = 512
+  c.width = c.height = 512
   const g = c.getContext('2d')
 
-  g.fillStyle = '#7d4a1d'
-  g.fillRect(0, 0, 1024, 512)
+  g.fillStyle = '#e9e4d9'
+  g.fillRect(0, 0, 512, 512)
 
-  // growth rings: wavy bands running around the bowl
-  for (let i = 0; i < 340; i++) {
+  for (let i = 0; i < 190; i++) {
+    const x = Math.random() * 512
     const y = Math.random() * 512
-    const dark = Math.random() < 0.5
-    g.strokeStyle = dark
-      ? `rgba(48, 24, 8, ${0.14 + Math.random() * 0.34})`
-      : `rgba(206, 143, 74, ${0.12 + Math.random() * 0.3})`
-    g.lineWidth = 0.6 + Math.random() * 3.4
-    g.beginPath()
-    const amp = 6 + Math.random() * 26
-    const freq = 1 + Math.random() * 2.5
-    const phase = Math.random() * Math.PI * 2
-    for (let x = 0; x <= 1024; x += 16) {
-      const yy = y + Math.sin((x / 1024) * Math.PI * 2 * freq + phase) * amp
-      x === 0 ? g.moveTo(x, yy) : g.lineTo(x, yy)
-    }
-    g.stroke()
-  }
-
-  // a few darker knots and streaks
-  for (let i = 0; i < 26; i++) {
-    const x = Math.random() * 1024
-    const y = Math.random() * 512
-    const r = 8 + Math.random() * 40
+    const r = 10 + Math.random() * 70
     const k = g.createRadialGradient(x, y, 1, x, y, r)
-    k.addColorStop(0, 'rgba(56, 29, 10, 0.4)')
-    k.addColorStop(1, 'rgba(56, 29, 10, 0)')
+    k.addColorStop(0, Math.random() < 0.5
+      ? 'rgba(166, 156, 138, 0.15)'
+      : 'rgba(255, 253, 248, 0.22)')
+    k.addColorStop(1, 'rgba(0,0,0,0)')
     g.fillStyle = k
     g.beginPath()
-    g.ellipse(x, y, r, r * 0.4, Math.random(), 0, Math.PI * 2)
+    g.arc(x, y, r, 0, Math.PI * 2)
     g.fill()
   }
 
-  woodTex = new THREE.CanvasTexture(c)
-  woodTex.colorSpace = THREE.SRGBColorSpace
-  woodTex.wrapS = woodTex.wrapT = THREE.RepeatWrapping
-  // the lathe wraps U once around the bowl, so repeating tightens the grain
-  // 1.5 keeps it reading as turned wood; push it much higher and the bands
-  // tighten up until the bowl looks like wicker
-  woodTex.repeat.set(1.5, 1)
-  woodTex.anisotropy = 8
-  return woodTex
+  clayTex = new THREE.CanvasTexture(c)
+  clayTex.colorSpace = THREE.SRGBColorSpace
+  clayTex.wrapS = clayTex.wrapT = THREE.RepeatWrapping
+  clayTex.anisotropy = 8
+  return clayTex
 }
 
-/* ----------------------------------------------------------------- vessels */
+/* ----------------------------------------------------------------- vessel */
 
 /**
- * Three turned bowls, all the same wood: a deep one, a wide shallow one and a
- * taller katori. `product.vessel` picks between them. Each profile runs up the
- * outside, over the rim and back down the inside, so the wall has thickness.
- * Every base sits on GROUND, which is why they share one shadow line.
+ * One bowl, for every product - the design serves all 48 in the same pale
+ * ceramic, and a grid only looks like a catalogue when the dish never
+ * changes. A pedestal foot, a rounded body and a thin rim.
+ *
+ * The profile runs from the centre of the foot, out and up the outside,
+ * over the rim and back down the inside, so the wall has real thickness.
+ * The base sits on GROUND, which is what puts it on the shadow line.
  */
-const BOWL_PROFILES = [
-  {
-    // deep bowl - the everyday one
-    pts: [
-      [0.0, -1.2], [0.66, -1.22], [1.16, -1.0], [1.58, -0.55], [1.84, 0.02], [1.92, 0.32],
-      [1.78, 0.34], [1.68, 0.2], [1.46, -0.26], [1.02, -0.72], [0.52, -0.92], [0.0, -0.96],
-    ],
-    fillY: 0.04,
-    fillR: 1.56,
-  },
-  {
-    // wide and shallow - shows more of what is in it
-    pts: [
-      [0.0, -1.2], [0.82, -1.22], [1.44, -1.04], [1.92, -0.62], [2.12, -0.14], [2.18, 0.14],
-      [2.04, 0.16], [1.95, 0.02], [1.74, -0.36], [1.26, -0.72], [0.72, -0.88], [0.0, -0.92],
-    ],
-    fillY: -0.02,
-    fillR: 1.86,
-  },
-  {
-    // katori - narrower and taller, piles up higher
-    pts: [
-      [0.0, -1.2], [0.52, -1.22], [0.94, -1.02], [1.32, -0.56], [1.58, 0.06], [1.66, 0.42],
-      [1.52, 0.44], [1.44, 0.3], [1.24, -0.22], [0.86, -0.68], [0.44, -0.9], [0.0, -0.94],
-    ],
-    fillY: 0.22,
-    fillR: 1.38,
-  },
+const BOWL = [
+  [0.0, -1.2], [0.5, -1.2], [0.55, -1.13], [0.6, -1.02], [0.95, -0.92],
+  [1.45, -0.64], [1.86, -0.18], [2.02, 0.22], [2.06, 0.42],
+  [1.92, 0.43], [1.88, 0.3], [1.7, -0.1], [1.3, -0.5], [0.8, -0.72], [0.0, -0.78],
 ]
 
-function woodBowl(group, which) {
-  const spec = BOWL_PROFILES[which % BOWL_PROFILES.length]
-  const profile = spec.pts.map(([x, y]) => new THREE.Vector2(x, y))
+const FILL = { fillY: 0.16, fillR: 1.78 }
 
-  const geo = new THREE.LatheGeometry(profile, 96)
+function clayBowl(group) {
+  const geo = new THREE.LatheGeometry(
+    BOWL.map(([x, y]) => new THREE.Vector2(x, y)),
+    96,
+  )
   geo.computeVertexNormals()
 
-  // white, so the grain shows at full strength instead of being tinted flat
   const mat = new THREE.MeshPhysicalMaterial({
-    map: wood(),
+    map: clay(),
     color: 0xffffff,
-    roughness: 0.42,
+    roughness: 0.34,
     metalness: 0,
-    clearcoat: 0.34,
-    clearcoatRoughness: 0.4,
+    clearcoat: 0.5,
+    clearcoatRoughness: 0.3,
   })
 
   const bowl = new THREE.Mesh(geo, mat)
@@ -284,10 +280,10 @@ function woodBowl(group, which) {
   bowl.receiveShadow = true
   group.add(bowl)
 
-  return { fillY: spec.fillY, fillR: spec.fillR }
+  return FILL
 }
 
-export const BOWLS = BOWL_PROFILES
+export const BOWLS = [BOWL]
 
 /* ---------------------------------------------------------------- backdrop */
 
@@ -299,30 +295,56 @@ export const BOWLS = BOWL_PROFILES
  * flattened to JPEG, which has no alpha - a transparent canvas would come
  * out black.
  */
-function backdrop() {
+/**
+ * What goes behind the product.
+ *
+ *   card - a white sweep, matching --surface, baked into the JPEG the
+ *          cards show. JPEG has no alpha, so it needs a real background.
+ *   none - nothing at all. The hero and the product page use this and
+ *          take a PNG, so the bowl floats on the page with the name
+ *          showing behind it.
+ *
+ * Painting a near-match and blending it with CSS does not work: a button
+ * or a transform makes its own stacking context and `mix-blend-mode`
+ * quietly stops applying, leaving a visible lighter rectangle.
+ */
+/* Flat, and exactly the page colour (--bg). It used to be a white gradient,
+   which looked fine until a real photograph sat next to a render in the
+   grid: the photo arrives on its own near-white and the two no longer
+   match. One flat colour everywhere - renders, placeholders and photos
+   put through `square.py --page` - and the grid stays even. */
+const SWEEPS = {
+  card: ['#F8F4EC', '#F8F4EC', '#F8F4EC'],
+}
+
+const sweepCache = new Map()
+
+function backdrop(which = 'card') {
+  if (which === 'none') return null
+  if (sweepCache.has(which)) return sweepCache.get(which)
+  const [top, mid, foot] = SWEEPS[which] ?? SWEEPS.card
+
   const c = document.createElement('canvas')
   c.width = c.height = 512
   const g = c.getContext('2d')
 
-  // Near-white, matched to the card it sits on, so the product looks cut out
-  // rather than framed in a window. The card colour is --surface in the
-  // stylesheet; change one and change the other.
   const sweep = g.createLinearGradient(0, 0, 0, 512)
-  sweep.addColorStop(0, '#FFFFFF')
-  sweep.addColorStop(0.55, '#FDFBF7')
-  sweep.addColorStop(1, '#F6F1E8')
+  sweep.addColorStop(0, top)
+  sweep.addColorStop(0.55, mid)
+  sweep.addColorStop(1, foot)
   g.fillStyle = sweep
   g.fillRect(0, 0, 512, 512)
 
-  // the faintest warm pool where the product stands
+  // the faintest pool of light where the product stands
   const pool = g.createRadialGradient(240, 220, 10, 256, 258, 300)
-  pool.addColorStop(0, 'rgba(255, 255, 255, 0.9)')
+  pool.addColorStop(0, 'rgba(255, 255, 255, 0.75)')
   pool.addColorStop(1, 'rgba(255, 255, 255, 0)')
   g.fillStyle = pool
   g.fillRect(0, 0, 512, 512)
 
   const tex = new THREE.CanvasTexture(c)
   tex.colorSpace = THREE.SRGBColorSpace
+  sweepCache.set(which, tex)
   return tex
 }
 
@@ -372,6 +394,8 @@ class Studio {
     this.ok = false
     this.renderer = null
     this.raf = null
+    // true while the canvas is handed to a page and turning
+    this.live = false
     this.spin = { dragging: false, pitch: PITCH, target: PITCH, vel: 0, auto: true }
     this.dummy = new THREE.Object3D()
     this.tint = new THREE.Color()
@@ -390,6 +414,9 @@ class Studio {
       return false
     }
     this.renderer.setPixelRatio(Math.min(2, window.devicePixelRatio || 1))
+    // transparent when no background texture is set, so the hero and the
+    // product page can show the page through the render
+    this.renderer.setClearAlpha(0)
     this.renderer.outputColorSpace = THREE.SRGBColorSpace
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping
     this.renderer.toneMappingExposure = 0.94
@@ -629,7 +656,7 @@ class Studio {
           Math.random() * Math.PI * 2,
           Math.random() * Math.PI * 2,
         )
-        const s = 0.8 + Math.random() * 0.4
+        const s = 0.42 + Math.random() * 0.3
         this.dummy.scale.set(s, s, s)
         this.dummy.updateMatrix()
         mesh.setMatrixAt(i, this.dummy.matrix)
@@ -641,13 +668,15 @@ class Studio {
 
   compose(product, { scatter = false } = {}) {
     this.clearRig()
-    const info = woodBowl(this.rig, product.vessel ?? 0)
+    const info = clayBowl(this.rig)
     const tones = TONES[product.tone] ?? TONES.golden
     const cfg = SETTLE[product.kind] ?? SETTLE.mix
 
     this.pile(product.kind, tones, info.fillY, info.fillR, cfg.h, cfg.count)
     this.garnish(info.fillY, info.fillR, cfg.h)
-    if (scatter) this.airborne(product.kind, tones, info.fillY + 1.05, info.fillR * 1.7, 2.5, 4)
+    // the airborne pieces read as crumbs, not as a second helping - keep
+    // them small and close, or they look like the bowl exploded
+    if (scatter) this.airborne(product.kind, tones, info.fillY + 0.95, info.fillR * 1.35, 1.9, 3)
 
     this.rig.rotation.set(0, -0.55, 0)
     this.spin.pitch = this.spin.target = PITCH
@@ -661,8 +690,10 @@ class Studio {
    * `pull` moves the camera back, which the hero needs so the scatter does
    * not run off the edges.
    */
-  thumbnail(product, { size = THUMB, scatter = false, pull = 0 } = {}) {
+  thumbnail(product, { size = THUMB, scatter = false, pull = 0, on = 'card' } = {}) {
     if (!this.init()) return null
+    const clear = on === 'none'
+    this.scene.background = backdrop(on)
     this.compose(product, { scatter })
 
     if (pull) {
@@ -676,15 +707,28 @@ class Studio {
     this.camera.aspect = 1
     this.camera.updateProjectionMatrix()
     this.renderer.render(this.scene, this.camera)
-    const url = this.renderer.domElement.toDataURL('image/jpeg', 0.88)
+    // PNG when there is no background, because JPEG would flatten the
+    // transparent pixels to black
+    const url = clear
+      ? this.renderer.domElement.toDataURL('image/png')
+      : this.renderer.domElement.toDataURL('image/jpeg', 0.88)
 
     if (pull) this.applyCamera()
     return url
   }
 
-  /** Put the live canvas into `el` and start turning `product`. */
-  attach(el, product, { reducedMotion = false } = {}) {
+  /**
+   * Put the live canvas into `el` and start turning `product`.
+   *
+   * There is one WebGL context for the whole site, so while this is held
+   * the thumbnail queue must leave it alone - rendering a card would
+   * resize the canvas and recompose the scene under the visitor's hands.
+   * `live` is the flag useThumbnails waits on.
+   */
+  attach(el, product, { reducedMotion = false, on = 'none' } = {}) {
     if (!this.init()) return
+    this.live = true
+    this.scene.background = backdrop(on)
     this.compose(product)
     this.spin.dragging = false
     this.spin.vel = 0
@@ -697,6 +741,7 @@ class Studio {
   detach() {
     if (this.raf) cancelAnimationFrame(this.raf)
     this.raf = null
+    this.live = false
     this.canvas?.parentNode?.removeChild(this.canvas)
   }
 

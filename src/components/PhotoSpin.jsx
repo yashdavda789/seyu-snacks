@@ -7,8 +7,11 @@ import { useEffect, useRef, useState } from 'react'
  *
  * Frames are preloaded before the first drag, otherwise the first turn
  * stutters while the browser fetches each one.
+ *
+ * Used when `src/photos/<slug>/` holds a numbered set. One photograph on
+ * its own cannot spin - it holds one angle - so that case shows a still.
  */
-export default function PhotoSpin({ frames, alt }) {
+export default function PhotoSpin({ frames, alt, className = '' }) {
   const [index, setIndex] = useState(0)
   const [ready, setReady] = useState(false)
   const boxRef = useRef(null)
@@ -38,7 +41,7 @@ export default function PhotoSpin({ frames, alt }) {
   // drag, touch and arrow keys all move through the frames
   useEffect(() => {
     const box = boxRef.current
-    if (!box) return
+    if (!box) return undefined
 
     let lastX = null
     let carried = 0
@@ -46,7 +49,6 @@ export default function PhotoSpin({ frames, alt }) {
     // how far the pointer travels for one frame; a full drag across the
     // box turns the product roughly once
     const step = () => Math.max(6, box.clientWidth / Math.max(frames.length, 1))
-
     const point = (e) => (e.touches ? e.touches[0] : e)
 
     const down = (e) => {
@@ -106,7 +108,7 @@ export default function PhotoSpin({ frames, alt }) {
 
   return (
     <div
-      className="lb-stage photo-spin"
+      className={`spin-box ${className}`.trim()}
       ref={boxRef}
       tabIndex={0}
       role="img"

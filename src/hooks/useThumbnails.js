@@ -44,6 +44,15 @@ export function useThumbnails(products, skipIds = new Set()) {
       if (cancelled) return
       if (i >= queue.length) return flush()
 
+      // One WebGL context serves the whole site. While a page is holding it
+      // and turning a product, rendering a card here would resize the canvas
+      // and recompose the scene mid-drag, so wait it out.
+      if (studio.live) {
+        flush()
+        setTimeout(step, 400)
+        return
+      }
+
       const product = queue[i++]
       try {
         // a few pieces caught in the air, the same as the hero - it is what

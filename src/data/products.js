@@ -44,6 +44,45 @@ export const CITIES = [
 
 export const DOMESTIC_DAYS = '2-4 days'
 
+/**
+ * The shop a product is collected from, shown on the product page.
+ *
+ * ⚠ PLACEHOLDER DATA. The names, areas and ratings below came from the
+ * design mock-up, not from the shops. Before this goes live, every entry
+ * needs the real maker's permission and its real rating - publishing an
+ * invented Google rating for a named business is a claim about them you
+ * cannot stand behind.
+ *
+ * `maker: 'ahura'` on a product points at one of these. Products without
+ * one simply show no maker card.
+ */
+export const MAKERS = {
+  ahura: {
+    name: 'Ahura Bakery & Stores',
+    area: 'Andheri, Mumbai, Maharashtra',
+    rating: 4.2,
+    note:
+      'Every bite from Ahura Bakery & Stores carries the nostalgic richness of pure butter, ' +
+      'freshly roasted spices and time-honoured Parsi craft — balancing crisp textures with ' +
+      'melt-in-your-mouth warmth.',
+  },
+  prashant: {
+    name: 'Prashant Corner',
+    area: 'Dadar, Mumbai, Maharashtra',
+    rating: 4.4,
+    note:
+      'A Dadar fixture for decades, frying in small batches through the morning so the ' +
+      'counter is never selling yesterday. The sev and chivda are what the queue is for.',
+  },
+}
+
+/** The default maker, until each product is assigned its own. */
+export const DEFAULT_MAKER = 'prashant'
+
+export function makerOf(product) {
+  return MAKERS[product.maker ?? DEFAULT_MAKER] ?? null
+}
+
 export const PRODUCTS = [
   {"id": 0, "slug": "navratna-chivda", "title": "Navratna Chivda", "price": 600.0, "unit": "1 Kg", "desc": "A delicious and crunchy blend of rice flakes, crispy sev, Bengal gram, peanuts, potato, and lentils, perfectly seasoned…", "kind": "mix", "tone": "golden", "vessel": 0, "accent": 7541262},
   {"id": 1, "slug": "bikaneri-bhujia", "title": "Bikaneri Bhujia", "price": 600.0, "unit": "1 Kg", "desc": "A timeless favourite made with a fine blend of gram flour and traditional aromatic spices.", "kind": "strand", "tone": "golden", "vessel": 1, "accent": 1324588},
@@ -61,7 +100,7 @@ export const PRODUCTS = [
   {"id": 13, "slug": "schezwan-roll", "title": "Schezwan Roll", "price": 560.0, "unit": "1 Kg", "desc": "Schezwan Roll is a crispy, golden snack filled with a bold and spicy schezwan-flavored mixture.", "kind": "stick", "tone": "red", "vessel": 1, "accent": 1324588},
   {"id": 14, "slug": "methi-puri", "title": "Methi Puri", "price": 600.0, "unit": "1 Kg", "desc": "Methi Puri is a crispy and flavorful dry snack made with refined flour blended with fresh fenugreek leaves and aromatic…", "kind": "disc", "tone": "green", "vessel": 2, "accent": 3017535},
   {"id": 15, "slug": "nylon-papdi", "title": "Nylon Papdi", "price": 720.0, "unit": "1 Kg", "desc": "Nylon Papdi is a light and crispy dry namkeen made from refined flour and delicately seasoned for a mild, savory taste.", "kind": "disc", "tone": "cream", "vessel": 0, "accent": 8010246},
-  {"id": 16, "slug": "sp-bhakarwadi", "title": "SP. Bhakarwadi", "price": 600.0, "unit": "1 Kg", "desc": "Special Bhakarwadi is a richer and more indulgent version of the traditional favorite, crafted with a premium blend of…", "kind": "wheel", "tone": "golden", "vessel": 1, "accent": 7541262},
+  {"id": 16, "slug": "sp-bhakarwadi", "title": "SP. Bhakarwadi", "price": 600.0, "unit": "1 Kg", "desc": "Special Bhakarwadi is a richer and more indulgent version of the traditional favorite, crafted with a premium blend of…", "kind": "wheel", "tone": "deep", "vessel": 1, "accent": 7541262},
   {"id": 17, "slug": "sweet-boondi", "title": "Sweet Boondi", "price": 680.0, "unit": "1 Kg", "desc": "Sweet Boondi is a delightful traditional sweet made from tiny golden droplets of gram flour, fried to perfection and…", "kind": "bead", "tone": "deep", "vessel": 2, "accent": 1324588},
   {"id": 18, "slug": "mora-sev", "title": "Mora Sev", "price": 600.0, "unit": "1 Kg", "desc": "Mora Sev is a thick and crunchy variation of traditional sev made from high-quality gram flour and blended with aromatic…", "kind": "strand", "tone": "golden", "vessel": 0, "accent": 3017535},
   {"id": 19, "slug": "ckp-karanji", "title": "CKP Karanji", "price": 50.0, "unit": "1 Piece", "desc": "CKP Karanji is a traditional festive delicacy known for its crisp, flaky outer shell and rich, flavorful filling.", "kind": "crescent", "tone": "golden", "vessel": 1, "accent": 8010246},
@@ -77,7 +116,7 @@ export const PRODUCTS = [
   {"id": 29, "slug": "methi-matthi", "title": "Methi Matthi", "price": 600.0, "unit": "1 Kg", "desc": "Our Methi Mathris are made with pure fenugreek, which has a natural bitterness.", "kind": "disc", "tone": "green", "vessel": 2, "accent": 1324588},
   {"id": 30, "slug": "palak-matthi", "title": "Palak Matthi", "price": 600.0, "unit": "1 Kg", "desc": "Palak Mathri is a savoury snack which is deep fried on low flame to crispy and melt in mouth texture.", "kind": "disc", "tone": "green", "vessel": 0, "accent": 3017535},
   {"id": 31, "slug": "diet-bhel", "title": "Diet Bhel", "price": 600.0, "unit": "1 Kg", "desc": "Diet Bhel is a light and crunchy namkeen blend made with puffed grains and carefully selected ingredients for a wholesome…", "kind": "mix", "tone": "golden", "vessel": 1, "accent": 8010246},
-  {"id": 32, "slug": "bhakarwadi-big", "title": "Bhakarwadi Big", "price": 600.0, "unit": "1 Kg", "desc": "Bhakarwadi is a classic snack made with a crisp outer layer rolled around a flavorful, spiced filling of…", "kind": "wheel", "tone": "golden", "vessel": 2, "accent": 7541262},
+  {"id": 32, "slug": "bhakarwadi-big", "title": "Bhakarwadi Big", "price": 600.0, "unit": "1 Kg", "desc": "Bhakarwadi is a classic snack made with a crisp outer layer rolled around a flavorful, spiced filling of…", "kind": "wheel", "tone": "deep", "vessel": 2, "accent": 7541262},
   {"id": 33, "slug": "diet-corn-chivda", "title": "Diet Corn Chivda", "price": 650.0, "unit": "1 Kg", "desc": "Diet Corn Chivda is a light and crispy namkeen made with roasted corn flakes blended with puffed grains and mild seasoning.", "kind": "mix", "tone": "golden", "vessel": 0, "accent": 1324588},
   {"id": 34, "slug": "pravasi-chivda", "title": "Pravasi Chivda", "price": 680.0, "unit": "1 Kg", "desc": "Mahalaxmi Chivda is a rich and flavorful dry namkeen made with a traditional blend of crispy poha, peanuts, roasted…", "kind": "mix", "tone": "golden", "vessel": 1, "accent": 3017535},
   {"id": 35, "slug": "dryfruit-mixture", "title": "Dryfruit Mixture", "price": 1280.0, "unit": "1 Kg", "desc": "Dry Fruit Mixture is a rich and premium namkeen blend made with an assortment of crunchy dry fruits combined with crispy…", "kind": "mix", "tone": "deep", "vessel": 2, "accent": 8010246},

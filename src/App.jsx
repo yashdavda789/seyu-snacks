@@ -1,26 +1,27 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import Header, { Ticker } from './components/Header.jsx'
 import Hero from './components/Hero.jsx'
-import ShipBand from './components/ShipBand.jsx'
 import Steps from './components/Steps.jsx'
 import Story from './components/Story.jsx'
+import Craving from './components/Craving.jsx'
+import BoxModal from './components/BoxModal.jsx'
+import BackToTop from './components/BackToTop.jsx'
 import Controls from './components/Controls.jsx'
 import ProductCard from './components/ProductCard.jsx'
-import SpinModal from './components/SpinModal.jsx'
-import OrderForm from './components/OrderForm.jsx'
-import FloatingOrder from './components/FloatingOrder.jsx'
+import ProductPage from './components/ProductPage.jsx'
 import Footer from './components/Footer.jsx'
 import { PRODUCTS } from './data/products.js'
-import { framesFor, photoFor } from './photos/index.js'
+import { photoFor } from './photos/index.js'
 import { useThumbnails } from './hooks/useThumbnails.js'
 
-/** How many cards show at once, and how many each "View more" adds. */
+/** How many cards show at once, and how many each "View All" adds. */
 const PAGE = 8
 
 export default function App() {
   const [query, setQuery] = useState('')
   const [limit, setLimit] = useState(PAGE)
-  const [spinning, setSpinning] = useState(null)
+  const [open, setOpen] = useState(null) // the product page, or null for home
+  const [box, setBox] = useState(false)  // the build-your-box dialog
   const gridRef = useRef(null)
 
   // products that already have a photograph don't need a render
@@ -45,9 +46,36 @@ export default function App() {
   const visible = useMemo(() => matches.slice(0, limit), [matches, limit])
   const left = matches.length - visible.length
 
-  // Only what is on screen gets rendered in 3D. Opening the page used to
-  // build all 48; now it builds 8, and each "View more" builds 8 more.
-  const shots = useThumbnails(visible, photographed)
+  // Only what is on screen gets rendered in 3D, plus whatever the product
+  // page is showing, so opening the page builds 8 models rather than 48.
+  const needed = useMemo(() => {
+    if (!open) return visible
+    return visible.some((p) => p.id === open.id) ? visible : [open, ...visible]
+  }, [visible, open])
+  const shots = useThumbnails(needed, photographed)
+
+  const openProduct = useCallback((p) => {
+    setOpen(p)
+    window.scrollTo({ top: 0, behavior: 'auto' })
+  }, [])
+
+  const goHome = useCallback((hash) => {
+    setOpen(null)
+    requestAnimationFrame(() => {
+      const el = hash ? document.querySelector(hash) : null
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      else window.scrollTo({ top: 0, behavior: 'auto' })
+    })
+  }, [])
+
+  // the browser back button leaves the product page
+  useEffect(() => {
+    if (!open) return undefined
+    window.history.pushState({ pdp: open.slug }, '')
+    const back = () => setOpen(null)
+    window.addEventListener('popstate', back)
+    return () => window.removeEventListener('popstate', back)
+  }, [open])
 
   function viewMore() {
     const first = visible.length
@@ -55,7 +83,7 @@ export default function App() {
     // put the keyboard on the first newly revealed card rather than leaving
     // focus on a button that may have just disappeared
     requestAnimationFrame(() => {
-      const cards = gridRef.current?.querySelectorAll('.card-art')
+      const cards = gridRef.current?.querySelectorAll('.card-hit')
       cards?.[first]?.focus({ preventScroll: true })
     })
   }
@@ -63,79 +91,73 @@ export default function App() {
   return (
     <>
       <Ticker />
-      <Header />
-      <Hero count={PRODUCTS.length} />
-      <Steps />
+      <Header active={open ? 'Products' : ''} onHome={open ? goHome : undefined} />
 
-      <main id="main">
-        <div className="wrap">
-          <div className="sec-head">
-            <h2>Our most-loved snacks</h2>
-            <p>Tried, tasted and trusted &mdash; fried fresh every morning, sealed the same day.</p>
-          </div>
+      {open ? (
+        <ProductPage product={open} shots={shots} onOpen={openProduct} />
+      ) : (
+        <>
+          <Hero onOpen={openProduct} />
+          <Steps />
 
-          <Controls query={query} onQuery={setQuery} shown={matches.length} />
-
-          {matches.length > 0 ? (
-            <>
-              <div className="grid" ref={gridRef}>
-                {visible.map((p) => (
-                  <ProductCard
-                    key={p.id}
-                    product={p}
-                    photo={photoFor(p.slug)}
-                    shot={shots[p.id]}
-                    onSpin={setSpinning}
-                  />
-                ))}
+          <main id="main">
+            <div className="wrap">
+              <div className="sec-head">
+                <h2>Our most-loved snacks</h2>
+                <p>Tried, tasted and trusted by thousands of happy snackers.</p>
               </div>
 
-              <div className="more" aria-live="polite">
-                <p className="more-count">
-                  Showing <strong>{visible.length}</strong> of {matches.length}
-                  <span className="more-bar" aria-hidden="true">
-                    <span style={{ width: `${(visible.length / matches.length) * 100}%` }} />
-                  </span>
-                </p>
+              <Controls query={query} onQuery={setQuery} shown={matches.length} />
 
-                {left > 0 ? (
-                  <button className="more-btn" type="button" onClick={viewMore}>
-                    View More
-                    <span className="more-arrow" aria-hidden="true">
-                      →
-                    </span>
-                  </button>
-                ) : (
-                  <p className="more-done">
-                    That&rsquo;s everything <span aria-hidden="true">🎉</span>
+              {matches.length > 0 ? (
+                <>
+                  <div className="grid" ref={gridRef}>
+                    {visible.map((p) => (
+                      <ProductCard
+                        key={p.id}
+                        product={p}
+                        photo={photoFor(p.slug)}
+                        shot={shots[p.id]}
+                        onOpen={openProduct}
+                      />
+                    ))}
+                  </div>
+
+                  <div className="more" aria-live="polite">
+                    {left > 0 ? (
+                      <button className="more-btn" type="button" onClick={viewMore}>
+                        View All
+                        <span className="more-arrow" aria-hidden="true">
+                          →
+                        </span>
+                      </button>
+                    ) : (
+                      <p className="more-done">
+                        All {matches.length} of them <span aria-hidden="true">🎉</span>
+                      </p>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="empty">
+                  <h2>Nothing matches that</h2>
+                  <p>
+                    Try &ldquo;sev&rdquo;, &ldquo;chivda&rdquo; or &ldquo;peanut&rdquo; &mdash; or
+                    just message us and we&rsquo;ll make it.
                   </p>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="empty">
-              <h2>Nothing matches that</h2>
-              <p>
-                Try &ldquo;sev&rdquo;, &ldquo;chivda&rdquo; or &ldquo;peanut&rdquo; &mdash; or just
-                message us and we&rsquo;ll make it.
-              </p>
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </main>
+          </main>
 
-      <Story />
-      <ShipBand />
-      <OrderForm />
-      <Footer />
-      <FloatingOrder />
+          <Story />
+          <Craving onOpen={() => setBox(true)} />
+        </>
+      )}
 
-      {/* the same photos the card draws from, so the two never disagree */}
-      <SpinModal
-        product={spinning}
-        frames={spinning ? framesFor(spinning.slug) : []}
-        onClose={() => setSpinning(null)}
-      />
+      <Footer onJump={open ? goHome : undefined} />
+      <BackToTop />
+      <BoxModal open={box} onClose={() => setBox(false)} />
     </>
   )
 }
